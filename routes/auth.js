@@ -4,10 +4,10 @@ const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const bcrypt= require('bcryptjs');
 const jwt = require('jsonwebtoken');
-
+var fetchUser=require ('../middleware/fetchUser');
 const JWT_SECRET = 'Rajibisagoodb$oy';
 
-// Create a User using: POST "/api/auth/createuser" . Doesnot require auth.. No login require 
+//Route 1: Create a User using: POST "/api/auth/createuser" . Doesnot require auth.. No login require 
 // New Request: Header: content-type:application/json
 
 router.post('/createuser', [
@@ -60,7 +60,7 @@ router.post('/createuser', [
 
 
 
-// Authenticate a User using: POST "/api/auth/login" . Doesnot require auth.. No login require 
+//Route 2: Authenticate a User using: POST "/api/auth/login" . Doesnot require auth.. No login require 
 router.post('/login', [
     body('email', 'Enter a valid email').isEmail(),
     body('password', 'Password cannot be blank').exists(),
@@ -98,5 +98,25 @@ const {email,password}=req.body;
         return res.status(500).json({ error: 'Internal Server error' });
     }
 })
+
+// Route 3: Get loggedIn user details using: POST "/api/auth/getuser".login required 
+router.post('/getuser',fetchUser,async (req, res) => {
+try {
+    const userId=req.user.id;
+    const user = await User.findById(userId).select("-password");
+    res.send(user);
+} catch (err) {
+    console.error('Error creating user:', err);
+        // If it's a duplicate key error from Mongo (unique email), send a 400 with a helpful message
+        if (err && err.code === 11000) {
+            return res.status(400).json({ error: 'Please enter a unique value for email' ,message:err.message});
+        }
+        return res.status(500).json({ error: 'Internal Server error' });
+    }
+})
+
+
+
+
 
 module.exports = router
