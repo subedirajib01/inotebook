@@ -5,6 +5,7 @@ const { body, validationResult } = require('express-validator');
 const bcrypt= require('bcryptjs');
 const jwt = require('jsonwebtoken');
 var fetchUser=require ('../middleware/fetchUser');
+
 const JWT_SECRET = 'Rajibisagoodb$oy';
 
 //Route 1: Create a User using: POST "/api/auth/createuser" . Doesnot require auth.. No login require 
@@ -37,6 +38,7 @@ router.post('/createuser', [
             password: secPass,
         });
 
+
         const data={
             user:{
                 id:user.id
@@ -44,9 +46,7 @@ router.post('/createuser', [
             
         }
         const authtoken=jwt.sign(data,JWT_SECRET);
-
         res.json({authtoken:authtoken})
-
     } 
     catch (err) {
         console.error('Error creating user:', err);
@@ -114,9 +114,5 @@ try {
         return res.status(500).json({ error: 'Internal Server error' });
     }
 })
-
-
-
-
 
 module.exports = router
